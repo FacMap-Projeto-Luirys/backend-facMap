@@ -1,7 +1,7 @@
 README – Backend FacMap
 1. Sobre o projeto
 
-O FacMap é um projeto desenvolvido para facilitar a localização e o acesso a informações relacionadas às faculdades.
+
 
 O backend é responsável por gerenciar as regras de negócio, comunicação com o banco de dados, autenticação dos usuários e disponibilização das informações por meio de uma API.
 
