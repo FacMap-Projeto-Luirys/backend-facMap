@@ -1,215 +1,136 @@
-FacMap – Backend
+README – Backend FacMap
+1. Sobre o projeto
 
-Bem-vindos ao backend do FacMap! 🚀
+O FacMap é um projeto desenvolvido para facilitar a localização e o acesso a informações relacionadas às faculdades.
 
-Este repositório contém a API responsável pelo funcionamento do sistema FacMap, desenvolvida utilizando Python e FastAPI, com persistência de dados através do SQLAlchemy.
+O backend é responsável por gerenciar as regras de negócio, comunicação com o banco de dados, autenticação dos usuários e disponibilização das informações por meio de uma API.
 
-O objetivo deste README é orientar todos os integrantes da equipe sobre a organização do projeto, a responsabilidade de cada arquivo e como configurar o ambiente de desenvolvimento.
+2. Tecnologias utilizadas
+Python
+FastAPI – criação da API.
+SQLAlchemy – comunicação com o banco de dados.
+Pydantic – validação e estruturação dos dados.
+Uvicorn/FastAPI CLI – execução do servidor.
+Git e GitHub – versionamento do código.
+3. Organização das pastas
 
-🛠️ Tecnologias utilizadas
-Python 3.13 – Linguagem principal.
-FastAPI – Construção da API REST.
-SQLAlchemy – ORM para comunicação com o banco de dados.
-SQLite – Banco de dados utilizado na configuração atual.
-Pydantic – Validação e estruturação dos dados.
-Uvicorn – Servidor ASGI.
-📁 Estrutura do projeto
-text
-backend-facMap/
-│
-├── app/
-│   │
-│   ├── main.py
-│   ├── database.py
-│   │
-│   ├── models/
-│   │   └── user.py
-│   │
-│   ├── schemas/
-│   │   └── user.py
-│   │
-│   └── routes/
-│       └── users.py
-│
-├── venv/
-│
-├── .gitignore
-└── README.md
+O backend está organizado para separar as responsabilidades de cada parte do sistema.
 
-🧩 Organização e responsabilidades
-1. app/main.py – Inicialização da API
+app/
 
-É o ponto de entrada do backend.
+É a pasta principal da aplicação. Todo o código do backend fica dentro dela.
 
-Responsabilidades:
+app/main.py
 
-Criar a aplicação FastAPI.
-Importar e registrar as rotas.
-Inicializar as tabelas do banco de dados.
+É o arquivo principal da aplicação. Nele fica a inicialização do FastAPI, a configuração das rotas e a integração dos módulos principais.
 
-É nesse arquivo que os novos conjuntos de rotas devem ser registrados na aplicação.
+app/database.py
 
-2. app/database.py – Conexão com o banco de dados
+Responsável pela conexão com o banco de dados, criação da configuração do SQLAlchemy e gerenciamento das sessões utilizadas pela aplicação.
 
-Responsável pela configuração e gerenciamento da conexão com o banco.
+app/models/
 
-Contém:
+Contém os modelos das tabelas do banco de dados.
 
-DATABASE_URL: endereço do banco de dados.
-engine: mecanismo de conexão do SQLAlchemy.
-SessionLocal: criação das sessões do banco.
-Base: classe base dos modelos.
-get_db(): dependência utilizada pelas rotas para acessar o banco.
+Cada arquivo representa uma entidade que será armazenada no banco.
 
-Importante: quando uma rota precisar consultar ou modificar informações no banco, deve utilizar a dependência get_db().
+Exemplo: user.py representa o modelo de usuário.
 
-3. app/models/ – Modelos do banco de dados
+app/schemas/
 
-Essa pasta contém as classes que representam as tabelas do banco.
+Contém os schemas responsáveis pela validação dos dados recebidos e enviados pela API.
 
-Exemplo:
+Por exemplo, no cadastro de usuários, podemos ter:
 
-models/user.py
+UserCreate: dados necessários para criar um usuário.
+UserResponse: informações que serão retornadas pela API.
+app/routes/
 
-Define a estrutura da tabela de usuários, incluindo seus campos e tipos de dados.
+Contém as rotas da API, separadas por funcionalidade.
 
-Sempre que uma nova entidade precisar ser armazenada no banco, seu modelo deverá ser criado nessa pasta.
+Cada arquivo é responsável por um conjunto de endpoints.
 
-Exemplos de futuras entidades:
+Exemplo: users.py contém as rotas relacionadas aos usuários, como cadastro, consulta e outras operações.
 
-User
-Institution
-Course
-Establishment
-4. app/schemas/ – Validação dos dados
+4. Como funciona a comunicação entre as partes?
 
-Responsável por definir como os dados entram e saem da API.
+O funcionamento segue esta organização:
 
-Utiliza Pydantic para validar as informações recebidas e estruturar as respostas.
+O usuário realiza uma requisição à API.
+A rota correspondente recebe essa requisição.
+O schema valida os dados recebidos.
+A rota utiliza o model para interagir com o banco.
+O database gerencia a conexão e a sessão.
+A API retorna uma resposta ao usuário.
 
-Exemplo:
+Essa separação ajuda a manter o código organizado e facilita a manutenção e o desenvolvimento em equipe.
 
-schemas/user.py
+5. Como executar o backend?
 
-Contém:
+Primeiro, entre na pasta do projeto:
 
-UserCreate: dados necessários para cadastrar um usuário.
-UserResponse: informações que podem ser retornadas pela API.
-
-Diferença importante:
-
-Models representam a estrutura dos dados no banco.
-Schemas representam a estrutura dos dados que circulam pela API.
-
-Não confundir os dois!
-
-5. app/routes/ – Rotas e endpoints
-
-É onde ficam os endpoints da API.
-
-Exemplo:
-
-routes/users.py
-
-Responsável pelas operações relacionadas aos usuários.
-
-As rotas recebem as requisições, validam os dados, acessam os serviços necessários e retornam as respostas.
-
-Novos módulos podem ser organizados por funcionalidade, como:
-
-users.py
-institutions.py
-courses.py
-establishments.py
-⚙️ Como executar o projeto
-1. Clonar o repositório
-bash
-git clone https://github.com/FacMap-Projeto-Luirys/backend-facMap.git
-
-2. Entrar na pasta
 bash
 cd backend-facMap
 
-3. Criar o ambiente virtual
-bash
-python -m venv venv
 
-4. Ativar o ambiente virtual
+Ative o ambiente virtual:
 
-No Windows PowerShell:
+Windows PowerShell:
 
 powershell
-.\venv\Scripts\Activate.ps1
+.\venv\Scripts\Activate
 
-5. Instalar as dependências
 
-As dependências devem ser instaladas conforme o arquivo de requisitos do projeto.
+Instale as dependências:
 
-Caso ainda não exista um requirements.txt, ele deverá ser criado e versionado pela equipe.
+bash
+pip install -r requirements.txt
 
-6. Executar o servidor
+
+Execute o servidor:
+
 bash
 python -m fastapi dev app/main.py
 
-🌐 Documentação da API
 
-Com o servidor iniciado, acesse:
+Após iniciar, a API ficará disponível localmente.
 
-Swagger UI: http://127.0.0.1:8000/docs
+A documentação interativa do FastAPI poderá ser acessada em:
 
-ReDoc: http://127.0.0.1:8000/redoc
+http://127.0.0.1:8000/docs
 
-Essas páginas permitem visualizar e testar os endpoints disponíveis.
+6. Orientações para quem for desenvolver
 
-👥 Organização do desenvolvimento
+Para manter o projeto organizado, sigam algumas recomendações:
 
-Para manter o código organizado, cada integrante deve procurar trabalhar na funcionalidade pela qual ficou responsável.
+Não coloquem todas as funcionalidades dentro do main.py.
+Criem models para representar as tabelas do banco.
+Criem schemas para validar os dados.
+Organizem os endpoints dentro de routes.
+Evitem duplicar código.
+Utilizem nomes claros para arquivos, funções e variáveis.
+Antes de criar uma nova funcionalidade, verifiquem se já existe algum arquivo responsável por ela.
+7. Trabalho em equipe e GitHub
 
-Recomendações:
+Cada integrante deve trabalhar preferencialmente em uma branch própria.
 
-Criar modelos na pasta models/.
-Criar schemas correspondentes na pasta schemas/.
-Criar endpoints na pasta routes/.
-Evitar colocar toda a lógica dentro de main.py.
-Reutilizar a conexão com o banco através de get_db().
-Manter nomes de arquivos e classes claros.
-Testar os endpoints antes de enviar alterações.
-🌿 Git e colaboração
+Antes de começar a desenvolver, atualizem o projeto com as alterações mais recentes.
 
-Antes de começar a trabalhar, atualize seu repositório:
+Ao finalizar uma funcionalidade, façam um commit explicando brevemente o que foi alterado.
 
-bash
-git pull origin main
+Exemplos de commits:
 
+feat: criação das rotas de usuários
+fix: correção na conexão com banco de dados
+refactor: organização dos schemas
+docs: atualização da documentação
 
-Recomendamos criar uma branch para cada funcionalidade:
+Evitem alterar arquivos de outros módulos sem necessidade e sempre comuniquem mudanças que possam afetar outras funcionalidades.
 
-bash
-git checkout -b feat/nova-funcionalidade
+8. Importante
 
+A estrutura do backend foi pensada para permitir que várias pessoas desenvolvam funcionalidades diferentes sem precisar concentrar tudo em um único arquivo.
 
-Depois de concluir:
+O objetivo é manter o projeto modular, organizado e fácil de expandir conforme novas funcionalidades do FacMap forem implementadas.
 
-bash
-git add .
-git commit -m "feat: descrição da funcionalidade"
-git push origin feat/nova-funcionalidade
-
-
-Em seguida, abra um Pull Request para revisão e integração com a branch principal.
-
-Não enviar para o GitHub:
-
-Pasta venv/.
-Arquivos __pycache__/.
-Arquivos .env.
-Bancos de dados locais.
-📌 Observações importantes
-
-Este projeto está em desenvolvimento. A estrutura apresentada representa a organização inicial do backend e poderá crescer conforme novas funcionalidades forem implementadas.
-
-Antes de modificar arquivos compartilhados, como database.py e main.py, conversem com a equipe para evitar conflitos.
-
-Nosso objetivo é construir um backend organizado, escalável e de fácil manutenção para o FacMap.
-
-Bom desenvolvimento a todos! 💙
+Cada integrante deve respeitar a separação de responsabilidades para evitar conflitos e facilitar a integração do código.
