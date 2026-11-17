@@ -1,136 +1,162 @@
-README – Backend FacMap
-1. Sobre o projeto
+# Backend – FacMap
 
+## 1. Sobre o projeto
 
+O backend cuida das regras de negócio, da comunicação com o banco de dados e da autenticação dos usuários. Ele também calcula o resultado da avaliação de carreira e disponibiliza tudo por meio de uma API.
 
-O backend é responsável por gerenciar as regras de negócio, comunicação com o banco de dados, autenticação dos usuários e disponibilização das informações por meio de uma API.
+## 2. Tecnologias utilizadas
 
-2. Tecnologias utilizadas
-Python
-FastAPI – criação da API.
-SQLAlchemy – comunicação com o banco de dados.
-Pydantic – validação e estruturação dos dados.
-Uvicorn/FastAPI CLI – execução do servidor.
-Git e GitHub – versionamento do código.
-3. Organização das pastas
+- **Python 3.12+**
+- **FastAPI**: criação da API.
+- **Prisma (Prisma Client Python)**: ORM e comunicação com o banco de dados (SQLite em desenvolvimento).
+- **Pydantic**: validação e estruturação dos dados.
+- **PyJWT**: geração e validação dos tokens JWT.
+- **pwdlib (Argon2)**: hash das senhas.
+- **Uvicorn/FastAPI CLI**: execução do servidor.
+- **Git e GitHub**: versionamento do código.
 
-O backend está organizado para separar as responsabilidades de cada parte do sistema.
+## 3. Organização das pastas
 
+```
+prisma/
+  schema.prisma        Modelos do banco (User, Assessment)
 app/
+  main.py              Inicializa o FastAPI, CORS, conexão do Prisma e registra as rotas
+  database.py          Cliente do Prisma (db)
+  core/
+    config.py          Configurações lidas do .env
+    security.py        Hash de senha e criação/validação do JWT
+    deps.py            Dependência get_current_user (protege rotas)
+  schemas/             Schemas Pydantic (entrada e saída da API)
+  routes/
+    auth.py            /auth/register, /auth/login, /auth/token
+    users.py           /users/me
+    assessment.py      /assessment/...
+  services/
+    assessment.py      Cálculo do resultado da avaliação
+  data/
+    assessment.json    Perguntas, pesos e resultados da avaliação
+```
 
-É a pasta principal da aplicação. Todo o código do backend fica dentro dela.
+Os modelos das tabelas ficam em `prisma/schema.prisma`, e não mais em arquivos Python. Sempre que o schema mudar, rode `prisma db push` (ou `prisma migrate dev`) e `prisma generate`.
 
-app/main.py
+## 4. Como executar o backend
 
-É o arquivo principal da aplicação. Nele fica a inicialização do FastAPI, a configuração das rotas e a integração dos módulos principais.
-
-app/database.py
-
-Responsável pela conexão com o banco de dados, criação da configuração do SQLAlchemy e gerenciamento das sessões utilizadas pela aplicação.
-
-app/models/
-
-Contém os modelos das tabelas do banco de dados.
-
-Cada arquivo representa uma entidade que será armazenada no banco.
-
-Exemplo: user.py representa o modelo de usuário.
-
-app/schemas/
-
-Contém os schemas responsáveis pela validação dos dados recebidos e enviados pela API.
-
-Por exemplo, no cadastro de usuários, podemos ter:
-
-UserCreate: dados necessários para criar um usuário.
-UserResponse: informações que serão retornadas pela API.
-app/routes/
-
-Contém as rotas da API, separadas por funcionalidade.
-
-Cada arquivo é responsável por um conjunto de endpoints.
-
-Exemplo: users.py contém as rotas relacionadas aos usuários, como cadastro, consulta e outras operações.
-
-4. Como funciona a comunicação entre as partes?
-
-O funcionamento segue esta organização:
-
-O usuário realiza uma requisição à API.
-A rota correspondente recebe essa requisição.
-O schema valida os dados recebidos.
-A rota utiliza o model para interagir com o banco.
-O database gerencia a conexão e a sessão.
-A API retorna uma resposta ao usuário.
-
-Essa separação ajuda a manter o código organizado e facilita a manutenção e o desenvolvimento em equipe.
-
-5. Como executar o backend?
-
-Primeiro, entre na pasta do projeto:
-
-bash
+```powershell
 cd backend-facMap
 
+# 1. Criar e ativar o ambiente virtual
+python -m venv .venv
+.\.venv\Scripts\Activate
 
-Ative o ambiente virtual:
-
-Windows PowerShell:
-
-powershell
-.\venv\Scripts\Activate
-
-
-Instale as dependências:
-
-bash
+# 2. Instalar as dependências
 pip install -r requirements.txt
 
+# 3. Criar o .env (depois troque o JWT_SECRET_KEY por uma chave forte)
+copy .env.example .env
 
-Execute o servidor:
+# 4. Gerar o cliente do Prisma e criar o banco
+prisma generate
+prisma db push
 
-bash
-python -m fastapi dev app/main.py
+# 5. Rodar o servidor
+fastapi dev app/main.py
+```
 
+A API fica em `http://127.0.0.1:8000`. A documentação interativa está em `http://127.0.0.1:8000/docs`. Para testar as rotas protegidas por ela, clique em **Authorize** e informe o e-mail (no campo `username`) e a senha.
 
-Após iniciar, a API ficará disponível localmente.
+> O `prisma` precisa ser executado com o ambiente virtual **ativado**, senão aparece o erro `spawn prisma-client-py ENOENT`.
 
-A documentação interativa do FastAPI poderá ser acessada em:
+## 5. Autenticação (JWT)
 
-http://127.0.0.1:8000/docs
+| Método | Rota             | Protegida | Descrição                                                       |
+| ------ | ---------------- | --------- | --------------------------------------------------------------- |
+| POST   | `/auth/register` | não       | Cria a conta (`name`, `email`, `password`) e já devolve o token |
+| POST   | `/auth/login`    | não       | Login com JSON (`email`, `password`)                            |
+| POST   | `/auth/token`    | não       | Login via formulário OAuth2 (usado pelo `/docs`)                |
+| GET    | `/users/me`      | **sim**   | Dados do usuário logado                                         |
 
-6. Orientações para quem for desenvolver
+O login e o cadastro respondem com:
 
-Para manter o projeto organizado, sigam algumas recomendações:
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "bearer",
+  "expires_in": 86400,
+  "user": { "id": 1, "name": "Ana", "email": "ana@exemplo.com" }
+}
+```
 
-Não coloquem todas as funcionalidades dentro do main.py.
-Criem models para representar as tabelas do banco.
-Criem schemas para validar os dados.
-Organizem os endpoints dentro de routes.
-Evitem duplicar código.
-Utilizem nomes claros para arquivos, funções e variáveis.
-Antes de criar uma nova funcionalidade, verifiquem se já existe algum arquivo responsável por ela.
-7. Trabalho em equipe e GitHub
+Nas rotas protegidas, envie o header `Authorization: Bearer <access_token>`. Sem o token, ou com um token inválido ou expirado, a API responde `401`.
 
-Cada integrante deve trabalhar preferencialmente em uma branch própria.
+Para proteger uma rota nova, basta receber o usuário atual como parâmetro:
 
-Antes de começar a desenvolver, atualizem o projeto com as alterações mais recentes.
+```python
+from app.core.deps import CurrentUser
 
-Ao finalizar uma funcionalidade, façam um commit explicando brevemente o que foi alterado.
+@router.get("/minha-rota")
+async def minha_rota(user: CurrentUser):
+    ...
+```
+
+## 6. Avaliação (formulário)
+
+A resposta do formulário é calculada de acordo com o arquivo **`app/data/assessment.json`**:
+
+- `areas`: as áreas de TI (título, descrição, ícone, cor).
+- `questions`: as perguntas. Cada opção tem `weights`, que são os pontos que ela soma para cada área. O tipo pode ser `single` (uma resposta) ou `multiple` (várias). `exclusive: true` marca uma opção que não pode ser combinada com outras.
+- `scoring.base_pct`: afinidade mínima exibida. `scoring.top_n`: quantas áreas são recomendadas.
+- `results`: para cada área, os textos de "Por que esse resultado?", a disciplina relacionada e a prévia do PDI.
+
+A afinidade de cada área é calculada assim: `base_pct + (100 - base_pct) × pontos / pontuação máxima possível`. Os textos do resultado vêm da área com maior afinidade.
+
+Para mudar perguntas, pesos ou textos, edite só o JSON. Ele é validado e recarregado automaticamente quando o arquivo muda, sem precisar reiniciar o servidor. Se o `value` de uma opção mudar, atualize o texto correspondente no frontend (`src/data/content.ts`).
+
+| Método | Rota                  | Protegida | Descrição                                       |
+| ------ | --------------------- | --------- | ----------------------------------------------- |
+| GET    | `/assessment/form`    | não       | Perguntas e opções (sem os pesos)               |
+| POST   | `/assessment`         | **sim**   | Envia as respostas, calcula e salva o resultado |
+| GET    | `/assessment/latest`  | **sim**   | Último resultado do usuário                     |
+| GET    | `/assessment/history` | **sim**   | Todos os resultados do usuário                  |
+
+Exemplo de envio:
+
+```json
+{
+  "answers": {
+    "periodo": "1º período",
+    "tempo": "Cerca de 4 horas",
+    "atividade": ["Criar sites ou aplicativos"],
+    "contatos": ["Git e GitHub"],
+    "area": "dev",
+    "scenario": "data"
+  }
+}
+```
+
+Respostas que não existem no JSON, perguntas obrigatórias em branco ou uma opção exclusiva combinada com outras retornam `422` com a mensagem do problema.
+
+## 7. Orientações para quem for desenvolver
+
+- Não coloquem todas as funcionalidades dentro do `main.py`.
+- Modelem as tabelas no `prisma/schema.prisma`.
+- Criem schemas para validar os dados.
+- Organizem os endpoints dentro de `routes` e a lógica mais pesada em `services`.
+- Evitem duplicar código.
+- Usem nomes claros para arquivos, funções e variáveis.
+- Antes de criar uma nova funcionalidade, verifiquem se já existe algum arquivo responsável por ela.
+
+## 8. Trabalho em equipe e GitHub
+
+Cada integrante deve trabalhar, de preferência, em uma branch própria. Antes de começar a desenvolver, atualizem o projeto com as alterações mais recentes. Ao terminar uma funcionalidade, façam um commit explicando brevemente o que foi alterado.
 
 Exemplos de commits:
 
+```
 feat: criação das rotas de usuários
 fix: correção na conexão com banco de dados
 refactor: organização dos schemas
 docs: atualização da documentação
+```
 
 Evitem alterar arquivos de outros módulos sem necessidade e sempre comuniquem mudanças que possam afetar outras funcionalidades.
-
-8. Importante
-
-A estrutura do backend foi pensada para permitir que várias pessoas desenvolvam funcionalidades diferentes sem precisar concentrar tudo em um único arquivo.
-
-O objetivo é manter o projeto modular, organizado e fácil de expandir conforme novas funcionalidades do FacMap forem implementadas.
-
-Cada integrante deve respeitar a separação de responsabilidades para evitar conflitos e facilitar a integração do código.
