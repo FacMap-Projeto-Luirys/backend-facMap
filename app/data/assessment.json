@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "scoring": {
+    "base_pct": 30,
+    "top_n": 2
+  },
+  "areas": {
+    "dev": {
+      "title": "Desenvolvimento de software",
+      "desc": "Criação de sites, aplicativos e soluções digitais.",
+      "icon": "code",
+      "color": "#1F6B3A"
+    },
+    "data": {
+      "title": "Dados e Machine Learning",
+      "desc": "Análise de dados, visualizações e automações.",
+      "icon": "chart",
+      "color": "#0891B2"
+    },
+    "sec": {
+      "title": "Segurança",
+      "desc": "Proteção de sistemas, informações e usuários.",
+      "icon": "shield",
+      "color": "#B4233C"
+    },
+    "infra": {
+      "title": "Infraestrutura, redes e cloud",
+      "desc": "Redes, servidores, serviços em nuvem e disponibilidade.",
+      "icon": "server",
+      "color": "#D97706"
+    }
+  },
+  "questions": [
+    {
+      "id": "periodo",
+      "label": "Em qual período da faculdade você está?",
+      "type": "single",
+      "required": true,
+      "options": [
+        { "value": "1º período", "weights": {} },
+        { "value": "2º ao 4º período", "weights": {} },
+        { "value": "5º período ou mais", "weights": {} }
+      ]
+    },
+    {
+      "id": "tempo",
+      "label": "Quanto tempo você consegue estudar por semana?",
+      "type": "single",
+      "required": true,
+      "options": [
+        { "value": "Até 2 horas", "weights": {} },
+        { "value": "Cerca de 4 horas", "weights": {} },
+        { "value": "6 horas ou mais", "weights": {} }
+      ]
+    },
+    {
+      "id": "atividade",
+      "label": "Qual atividade parece mais interessante?",
+      "type": "multiple",
+      "required": true,
+      "options": [
+        { "value": "Criar sites ou aplicativos", "weights": { "dev": 3 } },
+        { "value": "Descobrir padrões em dados", "weights": { "data": 3 } },
+        { "value": "Proteger pessoas e sistemas", "weights": { "sec": 3 } },
+        { "value": "Entender redes, servidores e serviços em nuvem", "weights": { "infra": 3 } }
+      ]
+    },
+    {
+      "id": "contatos",
+      "label": "Com quais assuntos você já teve contato?",
+      "type": "multiple",
+      "required": false,
+      "options": [
+        { "value": "Git e GitHub", "weights": { "dev": 1 } },
+        { "value": "Lógica de programação", "weights": { "dev": 1, "data": 1 } },
+        { "value": "Terminal", "weights": { "infra": 1, "sec": 1 } },
+        { "value": "Banco de dados", "weights": { "data": 1, "dev": 1 } },
+        { "value": "Ainda não conheço nenhum deles", "weights": {}, "exclusive": true }
+      ]
+    },
+    {
+      "id": "area",
+      "label": "Qual área você escolheu explorar?",
+      "type": "single",
+      "required": true,
+      "options": [
+        { "value": "dev", "weights": { "dev": 4 } },
+        { "value": "data", "weights": { "data": 4 } },
+        { "value": "sec", "weights": { "sec": 4 } },
+        { "value": "infra", "weights": { "infra": 4 } }
+      ]
+    },
+    {
+      "id": "scenario",
+      "label": "O sistema de matrícula da FACAPE ficou lento. O que você teria mais vontade de fazer?",
+      "type": "single",
+      "required": false,
+      "options": [
+        { "value": "dev", "weights": { "dev": 2 } },
+        { "value": "data", "weights": { "data": 2 } },
+        { "value": "sec", "weights": { "sec": 2 } },
+        { "value": "infra", "weights": { "infra": 2 } }
+      ]
+    }
+  ],
+  "results": {
+    "dev": {
+      "why": [
+        { "icon": "star", "text": "Interesse em construir soluções que outras pessoas utilizam" },
+        { "icon": "layers", "text": "Facilidade para organizar problemas em etapas menores" },
+        { "icon": "code", "text": "Vontade de investigar e corrigir o que não está funcionando" }
+      ],
+      "discipline": {
+        "name": "Algoritmos e Lógica",
+        "text": "Ajuda a estruturar soluções e desenvolver o raciocínio utilizado em programação."
+      },
+      "pdi": [
+        { "period": "Semana 1", "task": "Git e GitHub", "color": "#1F6B3A" },
+        { "period": "Semanas 2–3", "task": "HTML e CSS", "color": "#0891B2" },
+        { "period": "Semanas 4–6", "task": "JavaScript básico", "color": "#059669" },
+        { "period": "Próxima etapa", "task": "Projeto autoral", "color": "#D97706" }
+      ]
+    },
+    "data": {
+      "why": [
+        { "icon": "chart", "text": "Curiosidade para entender padrões e interpretar resultados" },
+        { "icon": "layers", "text": "Gosto por organizar informações para apoiar decisões" },
+        { "icon": "star", "text": "Interesse em transformar números em respostas úteis" }
+      ],
+      "discipline": {
+        "name": "Banco de Dados",
+        "text": "Ensina a modelar e consultar dados, a base de qualquer análise."
+      },
+      "pdi": [
+        { "period": "Semana 1", "task": "Planilhas e lógica de dados", "color": "#0891B2" },
+        { "period": "Semanas 2–3", "task": "SQL básico", "color": "#1F6B3A" },
+        { "period": "Semanas 4–6", "task": "Python para análise (pandas)", "color": "#059669" },
+        { "period": "Próxima etapa", "task": "Painel com dados reais da FACAPE", "color": "#D97706" }
+      ]
+    },
+    "sec": {
+      "why": [
+        { "icon": "shield", "text": "Preocupação em proteger pessoas e informações" },
+        { "icon": "info", "text": "Atenção a detalhes e comportamentos fora do padrão" },
+        { "icon": "layers", "text": "Interesse em entender como os sistemas funcionam por dentro" }
+      ],
+      "discipline": {
+        "name": "Redes de Computadores",
+        "text": "Mostra como os dados trafegam, o ponto de partida para entender ataques e defesas."
+      },
+      "pdi": [
+        { "period": "Semana 1", "task": "Fundamentos de segurança da informação", "color": "#B4233C" },
+        { "period": "Semanas 2–3", "task": "Terminal Linux", "color": "#24323F" },
+        { "period": "Semanas 4–6", "task": "Redes e protocolos (TCP/IP, HTTP)", "color": "#0891B2" },
+        { "period": "Próxima etapa", "task": "Desafios CTF para iniciantes", "color": "#D97706" }
+      ]
+    },
+    "infra": {
+      "why": [
+        { "icon": "server", "text": "Interesse em manter serviços funcionando para muita gente" },
+        { "icon": "layers", "text": "Gosto por entender como as peças de um sistema se conectam" },
+        { "icon": "star", "text": "Vontade de resolver problemas de desempenho e disponibilidade" }
+      ],
+      "discipline": {
+        "name": "Sistemas Operacionais",
+        "text": "Explica processos, memória e arquivos, o que sustenta servidores e a nuvem."
+      },
+      "pdi": [
+        { "period": "Semana 1", "task": "Terminal Linux", "color": "#D97706" },
+        { "period": "Semanas 2–3", "task": "Redes básicas", "color": "#0891B2" },
+        { "period": "Semanas 4–6", "task": "Docker", "color": "#1F6B3A" },
+        { "period": "Próxima etapa", "task": "Deploy de um projeto na nuvem", "color": "#059669" }
+      ]
+    }
+  }
+}
