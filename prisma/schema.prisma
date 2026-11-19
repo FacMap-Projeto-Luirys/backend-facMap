@@ -8,8 +8,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooler (transaction mode, porta 6543) usado pela aplicação
+  directUrl = env("DIRECT_URL")   // conexão direta/session (porta 5432) usada em db push / migrate
 }
 
 model User {
@@ -26,7 +27,7 @@ model User {
 }
 
 // Cada envio do formulário de avaliação.
-// `answers` e `result` guardam JSON serializado em texto (SQLite não tem tipo JSON no Prisma 5).
+// `answers` e `result` guardam JSON serializado em texto (o código usa json.dumps/json.loads).
 model Assessment {
   id        Int      @id @default(autoincrement())
   userId    Int
