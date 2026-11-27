@@ -24,9 +24,10 @@ _PRISMA_ONLY_PARAMS = {"pgbouncer", "connection_limit", "pool_timeout"}
 def normalize_database_url(url: str) -> str:
     """`postgresql://...?pgbouncer=true` (formato do Prisma) → `postgresql+psycopg://...`."""
     parts = urlsplit(url)
-    scheme = "postgresql+psycopg" if parts.scheme in ("postgres", "postgresql") else parts.scheme
+    if parts.scheme not in ("postgres", "postgresql", "postgresql+psycopg"):
+        return url  # ex.: sqlite:///./facmap.db fica como está
     query = urlencode([(k, v) for k, v in parse_qsl(parts.query) if k not in _PRISMA_ONLY_PARAMS])
-    return urlunsplit((scheme, parts.netloc, parts.path, query, parts.fragment))
+    return urlunsplit(("postgresql+psycopg", parts.netloc, parts.path, query, parts.fragment))
 
 
 def make_engine(url: str) -> Engine:
