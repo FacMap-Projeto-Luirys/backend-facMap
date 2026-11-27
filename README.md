@@ -8,7 +8,8 @@ O backend cuida das regras de negócio, da comunicação com o banco de dados e 
 
 - **Python 3.12+**
 - **FastAPI**: criação da API.
-- **Prisma (Prisma Client Python)**: ORM e comunicação com o banco de dados (SQLite em desenvolvimento).
+- **SQLAlchemy 2**: ORM e comunicação com o banco de dados.
+- **PostgreSQL (Supabase)** com o driver **psycopg 3**.
 - **Pydantic**: validação e estruturação dos dados.
 - **PyJWT**: geração e validação dos tokens JWT.
 - **pwdlib (Argon2)**: hash das senhas.
@@ -18,11 +19,11 @@ O backend cuida das regras de negócio, da comunicação com o banco de dados e 
 ## 3. Organização das pastas
 
 ```
-prisma/
-  schema.prisma        Modelos do banco (User, Assessment)
 app/
-  main.py              Inicializa o FastAPI, CORS, conexão do Prisma e registra as rotas
-  database.py          Cliente do Prisma (db)
+  main.py              Inicializa o FastAPI, CORS, rotas e o /health
+  database.py          Conexão com o banco (engine, sessão e dependência DbSession)
+  init_db.py           Cria as tabelas que ainda não existem (python -m app.init_db)
+  models/              Tabelas do banco (User, Assessment)
   core/
     config.py          Configurações lidas do .env
     security.py        Hash de senha e criação/validação do JWT
@@ -38,7 +39,19 @@ app/
     assessment.json    Perguntas, pesos e resultados da avaliação
 ```
 
-Os modelos das tabelas ficam em `prisma/schema.prisma`, e não mais em arquivos Python. Sempre que o schema mudar, rode `prisma db push` (ou `prisma migrate dev`) e `prisma generate`.
+As tabelas ficam em `app/models/`. Os nomes de tabelas e colunas (`hashedPassword`, `createdAt`...) são os mesmos que o Prisma criava, então o banco que já existe continua funcionando. Para usar o banco numa rota, receba a sessão como parâmetro:
+
+```python
+from sqlalchemy import select
+from app.database import DbSession
+from app.models import User
+
+@router.get("/exemplo")
+def exemplo(db: DbSession):
+    return db.scalars(select(User.email)).all()
+```
+
+O `init_db` só cria tabelas que não existem: ele não altera colunas de tabelas que já estão no banco. Se mudar uma coluna, altere a tabela também no Supabase (SQL Editor).
 
 ## 4. Como executar o backend
 
@@ -52,12 +65,11 @@ python -m venv .venv
 # 2. Instalar as dependências
 pip install -r requirements.txt
 
-# 3. Criar o .env (depois troque o JWT_SECRET_KEY por uma chave forte)
+# 3. Criar o .env e preencher DATABASE_URL e JWT_SECRET_KEY
 copy .env.example .env
 
-# 4. Gerar o cliente do Prisma e criar o banco
-prisma generate
-prisma db push
+# 4. Criar as tabelas (só na primeira vez, num banco vazio)
+python -m app.init_db
 
 # 5. Rodar o servidor
 fastapi dev app/main.py
@@ -65,7 +77,19 @@ fastapi dev app/main.py
 
 A API fica em `http://127.0.0.1:8000`. A documentação interativa está em `http://127.0.0.1:8000/docs`. Para testar as rotas protegidas por ela, clique em **Authorize** e informe o e-mail (no campo `username`) e a senha.
 
-> O `prisma` precisa ser executado com o ambiente virtual **ativado**, senão aparece o erro `spawn prisma-client-py ENOENT`.
+Para conferir se a API está falando com o banco, abra `/health/db`. Se o banco estiver fora do ar ou a `DATABASE_URL` estiver errada, as rotas respondem `503` com a mensagem "Banco de dados indisponível".
+
+### Deploy na Vercel
+
+A Vercel detecta o FastAPI sozinha (`app/main.py`) e instala o `requirements.txt`. Em **Settings → Environment Variables** do projeto do backend, cadastre:
+
+| Variável         | Valor                                                                       |
+| ---------------- | --------------------------------------------------------------------------- |
+| `DATABASE_URL`   | URL do Supabase, "Transaction pooler" (porta 6543)                          |
+| `JWT_SECRET_KEY` | Uma chave forte (a mesma de antes, para não derrubar quem já está logado)   |
+| `CORS_ORIGINS`   | `https://frontend-fac-map.vercel.app`                                       |
+
+Depois de mudar variáveis, faça um **Redeploy**. No projeto do frontend, `VITE_API_URL` deve apontar para a URL do backend (também com redeploy, porque o valor entra no build).
 
 ## 5. Autenticação (JWT)
 
@@ -139,7 +163,7 @@ Respostas que não existem no JSON, perguntas obrigatórias em branco ou uma op�
 ## 7. Orientações para quem for desenvolver
 
 - Não coloquem todas as funcionalidades dentro do `main.py`.
-- Modelem as tabelas no `prisma/schema.prisma`.
+- Modelem as tabelas em `app/models/`.
 - Criem schemas para validar os dados.
 - Organizem os endpoints dentro de `routes` e a lógica mais pesada em `services`.
 - Evitem duplicar código.
