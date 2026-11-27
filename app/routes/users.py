@@ -7,6 +7,6 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get("/me", response_model=UserResponse)
-async def me(user: CurrentUser):
+def me(user: CurrentUser):
     """Rota protegida: devolve o usuário dono do token."""
     return user

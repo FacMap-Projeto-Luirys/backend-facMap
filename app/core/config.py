@@ -8,7 +8,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "file:./facmap.db"
+    # PostgreSQL do Supabase. A URL no formato do Prisma (postgresql://...?pgbouncer=true) também é aceita.
+    database_url: str
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24

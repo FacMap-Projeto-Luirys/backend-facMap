@@ -1,23 +1,12 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.database import db
 from app.routes import assessment, auth, users
-
-
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    await db.connect()
-    yield
-    await db.disconnect()
-
 
 settings = get_settings()
 
-app = FastAPI(title="FacMap API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="FacMap API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,5 +23,5 @@ app.include_router(assessment.router)
 
 
 @app.get("/health", tags=["Health"])
-async def health():
+def health():
     return {"status": "ok"}
